@@ -1,290 +1,1 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>الهدية البسيطة</title>
-<style>
-  body {
-    font-family: "Cairo", sans-serif;
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    color: #333;
-    animation: fadeIn 1.5s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  #countdown {
-    font-size: 2.2rem;
-    margin-top: 50px;
-    background: rgba(255,255,255,0.6);
-    display: inline-block;
-    padding: 15px 25px;
-    border-radius: 16px;
-    backdrop-filter: blur(4px);
-  }
-
-  #birthday-content {
-    display: none;
-    padding: 20px;
-    animation: slideUp 1s ease;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  h1 {
-    font-size: 3rem;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(0,0,0,0.3);
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 1.3rem;
-    color: #fff;
-  }
-
-  .question {
-    margin: 25px auto;
-    background: rgba(255,255,255,0.85);
-    padding: 20px;
-    width: 70%;
-    border-radius: 16px;
-    backdrop-filter: blur(5px);
-    color: #000;
-  }
-
-  select {
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    width: 80%;
-    font-size: 1rem;
-  }
-
-  button {
-    padding: 12px 30px;
-    cursor: pointer;
-    margin-top: 30px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 16px;
-    background: #ff6f91;
-    color: #fff;
-    transition: 0.3s;
-  }
-
-  button:hover {
-    background: #ff4f6d;
-    transform: scale(1.05);
-  }
-
-  #result-message {
-    margin-top: 30px;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 8px rgba(0,0,0,0.2);
-  }
-
-  /* نمط الفيديو الافتراضي داخل المحتوى */
-  #birthday-video {
-    display: none;
-    width: 70%;
-    margin-top: 20px;
-    border-radius: 12px;
-    max-height: 60vh;
-    background: #000;
-  }
-
-  /* حالة ملء الشاشة الاحتياطي (لو لم تُفعّل API) */
-  .fullpage-video {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    object-fit: cover !important;
-    z-index: 9999 !important;
-    border-radius: 0 !important;
-  }
-</style>
-</head>
-<body>
-<div id="countdown-title" style="font-size:1.8rem; margin-top:40px; color:#fff; text-shadow:0 0 6px rgba(0,0,0,0.2);">ستفتح هديتك البسيطة بعد 👀</div>
-<div id="countdown"></div>
-
-<div id="birthday-content" aria-live="polite">
-  <h1>🌹 عيد ميلاد سعيد</h1>
-
-  <p>نتمنى لك عامًا مليئًا بالسعادة والنجاح   <br>😂 بعد التفكير الطويل لكيفية تقديم هدية لهته المناسبة السعيدة و جدنا ان هته الطريقة هي 😂الاكثر امانا على حياتك و حياتنا على حد سواء <br> رغم بساطتها الى انها قد تحمل العديد من الصدق و المعاني <br> كل ما عليك هو الاجابة على الاسئلة البسيطة في الاسفل و الضغط على زر استضهار</p>
-
-  <div class="question">
-    <p  style="color: red;">هل تؤمن أن الحياة ستكافئك في عمرك الجديد؟</p>
-    <select id="q1">
-      <option>نعم</option>
-      <option>ربما</option>
-      <option>لا</option>
-    </select>
-  </div>
-
-  <div class="question">
-    <p  style="color: red;">هل تعتبر هذا العام فرصة جديدة؟</p>
-    <select id="q2">
-      <option>أكيد</option>
-      <option>حسب الظروف</option>
-      <option>لا أدري</option>
-    </select>
-  </div>
-
-  <div class="question">
-    <p  style="color: red;">اختر كيف تتوقع المستقبل؟</p>
-    <select id="q3">
-      <option>أفضل بكثير</option>
-      <option>عادي</option>
-      <option>أسوأ</option>
-    </select>
-  </div>
-
-  <button id="show-result">استظهار</button>
-
-  <div id="result-message" role="status" aria-live="polite"></div>
-
-  <!-- الفيديو الذي سيظهر بعد الضغط على زر استظهار -->
-  <video id="birthday-video" controls playsinline>
-    <source src="birthday.mp4" type="video/mp4">
-    متصفحك لا يدعم تشغيل الفيديو 😢
-  </video>
-</div>
-
-<script>
-  // --- تعديل: صيغة تاريخ موثوقة ---
-  // ضع هنا التاريخ الذي تريده (صيغة مفهومة لجميع المتصفحات)
-  const targetDate = new Date("November 18, 2025 23:00:00").getTime();
-
-  const countdownEl = document.getElementById("countdown");
-  const birthdayContent = document.getElementById("birthday-content");
-  const videoEl = document.getElementById("birthday-video");
-
-  // دالة مساعدة لعرض المحتوى فورًا
-  function showBirthdayContent() {
-    countdownEl.style.display = "none";
-    birthdayContent.style.display = "block";
-  }
-
-  // تحقق من صحة التاريخ أولاً - إن كان غير صحيح أظهر المحتوى فورًا
-  if (!isFinite(targetDate)) {
-    // التاريخ غير صالح
-    showBirthdayContent();
-  } else {
-    // إعداد العد التنازلي
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const diff = targetDate - now;
-
-      // لو وصلنا أو مرّ التاريخ، اعرض المحتوى
-      if (diff <= 0) {
-        clearInterval(timer);
-        showBirthdayContent();
-        return;
-      }
-
-      // حساب الأيام/الساعات/الدقائق/الثواني
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      // عرض العدّ — التأكد من أنه أرقام صحيحة
-      if ([days, hours, minutes, seconds].some(val => isNaN(val))) {
-        // في حالة أي خطأ حسابي — أعرض المحتوى لمنع NaN
-        showBirthdayContent();
-        clearInterval(timer);
-        return;
-      }
-
-      countdownEl.textContent = `${days} يوم ${hours} ساعة ${minutes} دقيقة ${seconds} ثانية`;
-    }, 1000);
-
-    // نفّذ مرة واحدة فور تحميل الصفحة لعرض القيمة الفورية بدون انتظار ثانية
-    (function initialTick() {
-      const now = new Date().getTime();
-      const diff = targetDate - now;
-      if (diff <= 0) {
-        showBirthdayContent();
-      } else {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        if ([days, hours, minutes, seconds].some(val => isNaN(val))) {
-          showBirthdayContent();
-          return;
-        }
-        countdownEl.textContent = `${days} يوم ${hours} ساعة ${minutes} دقيقة ${seconds} ثانية`;
-      }
-    })();
-  }
-
-  // --- عند الضغط على استظهار: اظهار الرسالة + تشغـيل الفيديو بملء الشاشة إن أمكن ---
-  document.getElementById("show-result").addEventListener("click", async function () {
-    const result = "مبروك ستحصل على كل ماتمنيته في هته السنة  و من يدري قد تحقق اول مليار لك 😂 🎉";
-    document.getElementById("result-message").textContent = result;
-
-    // إظهار الفيديو
-    videoEl.style.display = "block";
-
-    try {
-      // حاول تشغيل الفيديو (بما أن الضغط هو تفاعل مستخدم، فالتشغيل الآلي مسموح)
-      await videoEl.play();
-    } catch (e) {
-      // تجاهل أخطاء التشغيل التلقائي
-      console.warn("فشل تشغيل الفيديو آليًا:", e);
-    }
-
-    // ثم اطلب ملء الشاشة إن كانت الواجهة تدعم ذلك
-    const requestFS = videoEl.requestFullscreen || videoEl.webkitRequestFullscreen || videoEl.mozRequestFullScreen || videoEl.msRequestFullscreen;
-    if (requestFS) {
-      try {
-        // بعض المتصفحات تتطلب play() قبل requestFullscreen()
-        await requestFS.call(videoEl);
-      } catch (err) {
-        // إن فشل الدخول في Fullscreen API، نطبّق حل CSS احتياطي ليغطي الشاشة
-        console.warn("تعذر الدخول إلى وضع ملء الشاشة، سيتم استخدام البديل CSS:", err);
-        videoEl.classList.add("fullpage-video");
-      }
-    } else {
-      // لا يوجد دعم API → نستخدم CSS احتياطيًا
-      videoEl.classList.add("fullpage-video");
-    }
-
-    // إذا كان الفيديو دخل الملء الشاشة: عند الخروج نعيده لوضعه الطبيعي (اختياري)
-    function onFSChange() {
-      const fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-      if (!fsElement) {
-        // خرج المستخدم من وضع ملء الشاشة → نعيد تصميم الفيديو للمساحة داخل الصفحة
-        videoEl.classList.remove("fullpage-video");
-        videoEl.style.width = "70%";
-        videoEl.style.maxHeight = "60vh";
-      }
-    }
-
-    document.addEventListener("fullscreenchange", onFSChange);
-    document.addEventListener("webkitfullscreenchange", onFSChange);
-    document.addEventListener("mozfullscreenchange", onFSChange);
-    document.addEventListener("MSFullscreenChange", onFSChange);
-  });
-</script>
-
-</body>
-</html>
 
